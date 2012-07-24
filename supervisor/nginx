@@ -1,0 +1,45 @@
+upstream --DOMAIN_NAME--_app_server {
+    server unix:/var/www/--DOMAIN_NAME--/gunicorn.sock fail_timeout=0;
+}
+
+server {
+    server_name --DOMAIN_NAME-- www.--DOMAIN_NAME--;
+
+   location / {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_pass http://--DOMAIN_NAME--_app_server;
+        client_max_body_size 10m;
+   }
+
+    location /static_media {
+        access_log   off;
+        expires      30d;
+        root /var/www/--DOMAIN_NAME--/--PROJECT--;
+    }
+
+    location /--CLIENT_MEDIA-- {
+        access_log   off;
+        expires      30d;
+        root /var/www/--DOMAIN_NAME--/--PROJECT--;
+    }
+
+    location /robots.txt {
+        access_log   off;
+        expires      30d;
+        root /var/www/--DOMAIN_NAME--/--PROJECT--/static_media;
+    }
+
+    location /humans.txt {
+        access_log   off;
+        expires      30d;
+        root /var/www/--DOMAIN_NAME--/--PROJECT--/static_media;
+    }
+
+    location /favicon.ico {
+        access_log   off;
+        expires      30d;
+        root /var/www/--DOMAIN_NAME--/--PROJECT--/static_media;
+    }
+}
