@@ -13,33 +13,33 @@ server {
         client_max_body_size 10m;
    }
 
-    location /static_media {
+    location /static {
         access_log   off;
         expires      30d;
-        root /var/www/--DOMAIN_NAME--/--PROJECT--;
+        alias /var/www/--DOMAIN_NAME--/static_media;
     }
 
     location /--CLIENT_MEDIA-- {
         access_log   off;
         expires      30d;
-        root /var/www/--DOMAIN_NAME--/--PROJECT--;
+        root /var/www/--DOMAIN_NAME--;
     }
 
     location /robots.txt {
         access_log   off;
         expires      30d;
-        root /var/www/--DOMAIN_NAME--/--PROJECT--/static_media;
+        root /var/www/--DOMAIN_NAME--/static_media;
     }
 
     location /humans.txt {
         access_log   off;
         expires      30d;
-        root /var/www/--DOMAIN_NAME--/--PROJECT--/static_media;
+        root /var/www/--DOMAIN_NAME--/static_media;
     }
 
     location /favicon.ico {
         access_log   off;
         expires      30d;
-        root /var/www/--DOMAIN_NAME--/--PROJECT--/static_media;
+        root /var/www/--DOMAIN_NAME--/static_media;
     }
 }
