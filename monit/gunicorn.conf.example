@@ -1,0 +1,7 @@
+check process EXAMPLE.co.uk with pidfile /var/www/EXAMPLE.co.uk/gunicorn.pid
+    group gunicorn
+    start program = "/usr/local/bin/gunicornctrl start /var/www/EXAMPLE.co.uk"
+    stop program  = "/usr/local/bin/gunicornctrl stop /var/www/EXAMPLE.co.uk"
+    if failed unixsocket /var/www/EXAMPLE.co.uk/gunicorn.sock then start
+    if cpu > 50% for 5 cycles then alert
+
