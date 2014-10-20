@@ -3,7 +3,40 @@ upstream --DOMAIN_NAME--_app_server {
 }
 
 server {
+    # Non-SSL requests redirect to the correct domain https site
+    # This redirect intentionally doesn't include the HTTP path
+    
+    listen 80;
     server_name --DOMAIN_NAME-- www.--DOMAIN_NAME--;
+    return 301 https://--DOMAIN_NAME--;
+}
+
+server {
+    listen 443 ssl;
+
+    server_name --DOMAIN_NAME--;
+    ssl_certificate /etc/ssl/certs/incuna.com.crt;
+    ssl_certificate_key /etc/ssl/certs/incuna.com.key;
+
+    # Restrict to more secure ciphers and protocols
+    # All these lines from https://raymii.org/s/tutorials/Strong_SSL_Security_On_nginx.html and https://cipherli.st/
+
+    ssl_ciphers "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:ECDHE-RSA-DES-CBC3-SHA:EDH-RSA-DES-CBC3-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA:DES-CBC3-SHA:HIGH:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!PSK:!RC4";
+
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_session_cache  builtin:1000  shared:SSL:10m;
+
+    # ssl_stapling on; # Requires nginx >= 1.3.7
+    # ssl_stapling_verify on; # Requires nginx => 1.3.7
+    resolver 8.8.4.4 8.8.8.8 valid=300s;
+    resolver_timeout 5s;
+
+    ssl_prefer_server_ciphers on;
+    ssl_dhparam /etc/ssl/certs/dhparam.pem;
+
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains";
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
 
     location / {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -11,17 +44,16 @@ server {
         proxy_set_header X-Forwarded-Protocol $scheme;
         proxy_redirect off;
         proxy_pass http://--DOMAIN_NAME--_app_server;
-        client_max_body_size 200m;
-        proxy_read_timeout 1800;
     }
 
     location /admin {
+        client_max_body_size 200m;
+        proxy_read_timeout 1800;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $http_host;
         proxy_set_header X-Forwarded-Protocol $scheme;
         proxy_redirect off;
         proxy_pass http://--DOMAIN_NAME--_app_server;
-        client_max_body_size 10m;
     }
 
     location /static {
